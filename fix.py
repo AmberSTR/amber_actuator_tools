@@ -93,6 +93,46 @@ except socket.timeout:
     print("timeout!")
 s.close()
 time.sleep(0.5)
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Standard socket processes
+s.bind(("0.0.0.0", 12321))
+
+payloadS = robot_joint_position(1,  # CMD_NO
+                                20,  # Length
+                                12,  # ID
+                                0x31,  # Can_id
+                                1,  # Can_len
+                                1,  # Joint_no
+                                0x5E,0x00, 0, 0, 0, 0, 0, 0  # DATA
+                                )
+s.sendto(payloadS, (IP_ADDR, PORT))  # Default port is PORT
+s.settimeout(3)
+try:
+    data, addr = s.recvfrom(1024)  # Need receive return
+    print("Receiving: ", data.hex())
+    payloadR = robot_mode_data.from_buffer_copy(data)
+    print("Received: Cmd_no={:d}, Length={:d}, "
+          "ID={:d}, CAN_id={:x}, CAN_len={:d}, Proxy_Status={:d}, "
+          "".format(payloadR.Cmd_no,
+                    payloadR.Length,
+                    payloadR.ID,
+                    payloadR.Can_id,
+                    payloadR.Can_len,
+                    payloadR.Proxy_Status,
+                    ))
+    print("Received:Data={:x}  {:x}  {:x}  {:x}  {:x}  {:x}  {:x}"
+          .format(payloadR.Data0,
+                  payloadR.Data1,
+                  payloadR.Data2,
+                  payloadR.Data3,
+                  payloadR.Data4,
+                  payloadR.Data5,
+                  payloadR.Data6,
+                  payloadR.Data7,
+                  ))
+except socket.timeout:
+    print("timeout!")
+s.close()
+time.sleep(0.5)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Standard socket processes
 s.bind(("0.0.0.0", 12321))
@@ -101,7 +141,7 @@ payloadS = robot_joint_position(1,  # CMD_NO
                                 20,  # Length
                                 12,  # ID
                                 0x11,  # Can_id
-                                2,  # Can_len
+                                3,  # Can_len
                                 1,  # Joint_no
                                 0x71, 0x00, 0x73, 0, 0, 0, 0, 0  # DATA
                                 )
